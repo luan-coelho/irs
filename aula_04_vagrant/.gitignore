@@ -1,0 +1,20 @@
+# Vagrant & VirtualBox
+.vagrant/
+*.box
+*.log
+
+# VirtualBox VMs directory
+VirtualBox VMs/
+
+# Vagrant metadata
+.vagrant/
+
+# Ignore Mac OS X .DS_Store files
+.DS_Store
+
+# Ignore Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Ignore Linux .directory files used by KDE
+.directory
