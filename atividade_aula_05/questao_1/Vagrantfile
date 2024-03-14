@@ -1,0 +1,36 @@
+Vagrant.configure("2") do |config|
+  shared_folder_path = "./website"
+
+  config.vm.define "private_network_vm" do |private_vm|
+    private_vm.vm.box = "ubuntu/bionic64"
+    private_vm.vm.network "private_network", type: "dhcp"
+    private_vm.vm.synced_folder shared_folder_path, "/var/www/html"
+    private_vm.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y nginx
+      sudo systemctl restart nginx
+    SHELL
+  end
+
+  config.vm.define "public_network_vm" do |public_vm|
+    public_vm.vm.box = "ubuntu/bionic64"
+    public_vm.vm.network "public_network", bridge: "enp6s0"
+    public_vm.vm.synced_folder shared_folder_path, "/var/www/html"
+    public_vm.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y nginx
+      sudo systemctl restart nginx
+    SHELL
+  end
+
+  config.vm.define "forwarded_port_vm" do |forwarded_vm|
+    forwarded_vm.vm.box = "ubuntu/bionic64"
+    forwarded_vm.vm.network "forwarded_port", guest: 80, host: 8080
+    forwarded_vm.vm.synced_folder shared_folder_path, "/var/www/html"
+    forwarded_vm.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y nginx
+      sudo systemctl restart nginx
+    SHELL
+  end
+end
