@@ -2,7 +2,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.define "ftp_server" do |ftp|
       ftp.vm.box = "ubuntu/bionic64"
-      ftp.vm.network "private_network", ip: "192.168.56.101"
+      ftp.vm.network "public_network", bridge: "eno2"
       ftp.vm.provision "shell", inline: <<-SHELL
         sudo apt-get update
         sudo apt-get install -y vsftpd
@@ -18,10 +18,15 @@ Vagrant.configure("2") do |config|
         echo "pasv_min_port=10000" | sudo tee -a /etc/vsftpd.conf
         echo "pasv_max_port=10100" | sudo tee -a /etc/vsftpd.conf
   
-        sudo useradd -m ftpuser -s /usr/sbin/nologin
-        sudo echo "ftpuser:ftppassword" | sudo chpasswd
-        sudo mkdir /home/ftpuser/ftp_dir
-        sudo chown ftpuser:ftpuser /home/ftpuser/ftp_dir
+        sudo useradd -m luan
+        
+        sudo echo "luan:senha" | sudo chpasswd
+
+        sudo mkdir /home/luan/ftp_dir
+
+        sudo local_root=/home/luan/ftp_dir
+
+        sudo chown luan:luan /home/luan/ftp_dir
         
         sudo systemctl restart vsftpd
       SHELL
