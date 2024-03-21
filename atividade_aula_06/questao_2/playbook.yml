@@ -1,0 +1,66 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Atualiza os pacotes do APT
+      apt:
+        update_cache: yes
+
+    - name: Instala o nginx
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Remove a página inicial padrão do Nginx
+      file:
+        path: /var/www/html/index.nginx-debian.html
+        state: absent
+
+    - name: Copia os arquivos do site para o diretório do nginx
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/website/"
+        dest: /var/www/html/
+        mode: "0644"
+        directory_mode: "0755"
+        owner: www-data
+        group: www-data
+
+    - name: Instala o MySQL Server
+      apt:
+        name: mysql-server
+        state: latest
+
+    - name: Instala dependências do Python para o MySQL
+      apt:
+        name:
+          - python3-pymysql
+          - python3-pip
+        state: present
+
+    - name: Garante que o serviço do MySQL esteja rodando
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Cria o usuário MySQL 'vagrant'
+      mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: vagrant
+        host: localhost
+        password: vagrant
+        priv: "*.*:ALL,GRANT"
+        state: present
+
+    - name: Assegura a existência do banco de dados 'empresa'
+      mysql_db:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: empresa
+        state: present
+
+    - name: Cria tabela 'funcionarios' no banco de dados 'empresa'
+      mysql_query:
+        login_user: vagrant
+        login_password: vagrant
+        login_db: empresa
+        query: "CREATE TABLE IF NOT EXISTS funcionarios (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255), cargo VARCHAR(255));"
