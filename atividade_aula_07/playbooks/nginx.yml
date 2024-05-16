@@ -1,0 +1,16 @@
+# nginx.yml
+---
+- name: Configuração dos Servidores Nginx
+  hosts: nginx
+  become: yes
+  tasks:
+    - name: Instalação do Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Criação de página inicial
+      copy:
+        content: "Sou o Servidor Web {{ inventory_hostname }}"
+        dest: /var/www/html/index.html

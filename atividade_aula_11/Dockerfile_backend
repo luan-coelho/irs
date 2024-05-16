@@ -1,0 +1,20 @@
+# Use a imagem base do Node.js
+FROM node:latest
+
+# Defina o diretório de trabalho como /app
+WORKDIR /app
+
+# Copie o package.json para o diretório de trabalho
+COPY package.json .
+
+# Instale as dependências do projeto
+RUN npm install
+
+# Copie o resto dos arquivos da aplicação para o diretório de trabalho
+COPY . .
+
+# Exponha a porta 3000 (ou a porta que o servidor Node.js está ouvindo)
+EXPOSE 3000
+
+# Comando para iniciar o servidor Node.js
+CMD ["node", "server.js"]

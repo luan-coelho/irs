@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Atualiza os pacotes do APT
+      apt:
+        update_cache: yes
+
+    - name: Instala o nginx
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Remove a página inicial padrão do Nginx
+      file:
+        path: /var/www/html/index.nginx-debian.html
+        state: absent
+
+    - name: Copia os arquivos do site para o diretório do nginx
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/website/"
+        dest: /var/www/html/
+        mode: "0644"
+        directory_mode: "0755"
+        owner: www-data
+        group: www-data

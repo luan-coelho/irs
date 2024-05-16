@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"  # Mapeia a porta padrão do MongoDB (27017) para a mesma porta no host
+    networks:
+      - backend
+
+  backend:
+    build: ./backend   # Caminho para o diretório onde o Dockerfile do backend está localizado
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    networks:
+      - backend
+    environment:
+      MONGO_URI: "mongodb://mongo:27017/communicationapp"
+
+  frontend:
+    build: ./frontend  # Caminho para o diretório onde o Dockerfile do frontend está localizado
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  mongo_data:

@@ -1,0 +1,8 @@
+# Ignorar arquivos e pastas específicas para o backend Node.js
+/backend/node_modules
+/backend/npm-debug.log
+
+# Ignorar arquivos e pastas específicas para o frontend React
+/frontend/node_modules
+/frontend/build
+/frontend/.env

@@ -1,0 +1,87 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    config.vm.box = "ubuntu/bionic64"
+  
+    # Configuração dos balanceadores de carga
+    (1..2).each do |i|
+      config.vm.define "balanceador#{i}" do |lb|
+        lb.vm.hostname = "balanceador#{i}"
+        lb.vm.network "public_network", ip: "192.168.0.#{10 + i}", bridge: "enp6s0"
+  
+        # Instalação do Ansible
+        lb.vm.provision "shell" do |shell|
+          shell.inline = <<-SHELL
+            sudo apt update
+            sudo apt install -y software-properties-common
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            sudo apt install -y ansible
+            sudo apt-get install -y ipvsadm
+
+            # Configurar IPVS para balanceamento Round Robin
+            sudo ipvsadm -A -t 192.168.0.#{10 + i}:80 -s rr
+
+            # Adicionar servidores web ao balanceamento
+            sudo ipvsadm -a -t 192.168.0.#{10 + i}:80 -r 192.168.0.13:80 -m
+            sudo ipvsadm -a -t 192.168.0.#{10 + i}:80 -r 192.168.0.14:80 -m
+            sudo ipvsadm -a -t 192.168.0.#{10 + i}:80 -r 192.168.0.15:80 -m
+
+            # Salvar a configuração do IPVS
+            sudo ipvsadm-save > /etc/ipvs.rules
+
+            # Adicionar comando para restaurar configuração do IPVS no boot
+            echo "@reboot root ipvsadm-restore < /etc/ipvs.rules" | sudo tee -a /etc/crontab
+          SHELL
+        end
+      end
+    end
+  
+    # Configuração dos servidores Nginx
+    (1..2).each do |i|
+      config.vm.define "nginx#{i}" do |web|
+        web.vm.hostname = "nginx#{i}"
+        web.vm.network "public_network", ip: "192.168.0.#{12 + i}", bridge: "enp6s0" 
+  
+        # Instalação do Ansible via shell
+        web.vm.provision "shell" do |shell|
+          shell.inline = <<-SHELL
+            sudo apt update
+            sudo apt install -y software-properties-common
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            sudo apt install -y ansible
+          SHELL
+        end
+  
+        web.vm.provision "ansible" do |ansible|
+          ansible.playbook = "playbooks/nginx.yml"
+          ansible.groups = {
+            "nginx" => ["nginx#{i}"]
+          }
+        end
+      end
+    end
+    
+    # Configuração do servidor Apache
+    config.vm.define "apache" do |web|
+      web.vm.hostname = "apache"
+      web.vm.network "public_network", ip: "192.168.0.15", bridge: "enp6s0"
+  
+      web.vm.provision "shell" do |shell|
+        shell.inline = <<-SHELL
+          sudo apt update
+          sudo apt install -y software-properties-common
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt install -y ansible
+        SHELL
+      end
+  
+      web.vm.provision "ansible" do |ansible|
+        ansible.playbook = "playbooks/apache.yml"
+        ansible.groups = {
+          "apache" => ["apache"]
+        }
+      end
+    end
+  end  

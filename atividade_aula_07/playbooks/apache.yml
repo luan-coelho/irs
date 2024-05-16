@@ -1,0 +1,16 @@
+# apache.yml
+---
+- name: Configuração do Servidor Apache
+  hosts: apache
+  become: yes
+  tasks:
+    - name: Instalação do Apache2
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: Criação de página inicial
+      copy:
+        content: "Sou o Servidor Web {{ inventory_hostname }}"
+        dest: /var/www/html/index.html
