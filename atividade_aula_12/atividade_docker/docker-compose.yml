@@ -24,6 +24,8 @@ services:
     build: ./frontend  # Caminho para o diretório onde o Dockerfile do frontend está localizado
     ports:
       - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=18.229.164.142
     depends_on:
       - backend
     networks:

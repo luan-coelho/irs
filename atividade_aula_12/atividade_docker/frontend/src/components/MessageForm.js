@@ -5,7 +5,8 @@ function MessageForm({ setMessages }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    fetch("http://localhost:5000/api/messages", {
+    let ip = "18.229.164.142";
+    fetch(`http://${ip}:5000/api/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

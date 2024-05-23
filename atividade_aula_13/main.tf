@@ -3,9 +3,9 @@ provider "aws" {
 }
 
 resource "aws_instance" "web" {
-  ami           = var.ami
-  instance_type = var.instance_type
-  key_name      = var.key_name
+  ami             = "ami-0cdc2f24b2f67ea17"
+  instance_type   = "t2.micro"
+  key_name        = "aeros-elite"
   security_groups = [aws_security_group.web_sg.name]
 
   provisioner "file" {
@@ -15,7 +15,7 @@ resource "aws_instance" "web" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file(var.private_key_path)
+      private_key = file("./aeros-elite.pem")
       host        = self.public_ip
     }
   }
@@ -31,13 +31,13 @@ resource "aws_instance" "web" {
       "sudo apt install -y docker-compose",
       "sudo usermod -aG docker ubuntu",
       "newgrp docker",
-      "sudo docker-compose up"
+      "docker-compose -f /home/ubuntu/docker-compose.yml up"
     ]
 
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file(var.private_key_path)
+      private_key = file("./aeros-elite.pem")
       host        = self.public_ip
     }
   }
@@ -53,6 +53,13 @@ resource "aws_security_group" "web_sg" {
   ingress {
     from_port   = 3000
     to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5000
+    to_port     = 5000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

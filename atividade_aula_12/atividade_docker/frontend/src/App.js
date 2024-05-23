@@ -6,7 +6,8 @@ function App() {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/messages")
+    let ip = "18.229.164.142";
+    fetch(`http://${ip}:5000/api/messages`)
       .then((response) => response.json())
       .then((data) => setMessages(data))
       .catch((error) => console.error("Error fetching messages:", error));
