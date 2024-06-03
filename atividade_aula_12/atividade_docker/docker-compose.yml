@@ -2,6 +2,7 @@ version: '3.9'
 services:
   mongo:
     image: mongo
+    container_name: "db"
     volumes:
       - mongo_data:/data/db
     ports:
@@ -11,6 +12,7 @@ services:
 
   backend:
     build: ./backend   # Caminho para o diretório onde o Dockerfile do backend está localizado
+    container_name: "backend"
     ports:
       - "5000:5000"
     depends_on:
@@ -22,10 +24,11 @@ services:
 
   frontend:
     build: ./frontend  # Caminho para o diretório onde o Dockerfile do frontend está localizado
+    container_name: "frontend"
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=18.229.164.142
+      - REACT_APP_API_BASE_URL=http://localhost:5000/api
     depends_on:
       - backend
     networks:

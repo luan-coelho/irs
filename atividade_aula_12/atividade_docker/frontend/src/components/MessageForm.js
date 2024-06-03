@@ -4,9 +4,8 @@ function MessageForm({ setMessages }) {
   const [content, setContent] = useState("");
 
   const handleSubmit = (event) => {
-    event.preventDefault();
-    let ip = "18.229.164.142";
-    fetch(`http://${ip}:5000/api/messages`, {
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
+    fetch(`${baseUrl}/api/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
