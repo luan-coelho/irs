@@ -6,12 +6,12 @@ services:
     volumes:
       - mongo_data:/data/db
     ports:
-      - "27017:27017"  # Mapeia a porta padrão do MongoDB (27017) para a mesma porta no host
+      - "27017:27017"
     networks:
       - backend
 
   backend:
-    build: ./backend   # Caminho para o diretório onde o Dockerfile do backend está localizado
+    build: ./backend
     container_name: "backend"
     ports:
       - "5000:5000"
@@ -20,15 +20,16 @@ services:
     networks:
       - backend
     environment:
-      MONGO_URI: "mongodb://mongo:27017/communicationapp"
+      - MONGO_URI=mongodb://mongo:27017/communicationapp
 
   frontend:
-    build: ./frontend  # Caminho para o diretório onde o Dockerfile do frontend está localizado
+    build:
+      context: ./frontend
+      args:
+        - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
     container_name: "frontend"
     ports:
       - "3000:3000"
-    environment:
-      - REACT_APP_API_BASE_URL=http://localhost:5000/api
     depends_on:
       - backend
     networks:
