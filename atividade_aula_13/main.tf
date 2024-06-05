@@ -31,7 +31,7 @@ resource "aws_instance" "web" {
       "sudo apt install -y docker-compose",
       "sudo usermod -aG docker ubuntu",
       "newgrp docker",
-      "docker-compose -f /home/ubuntu/docker-compose.yml up"
+      "sudo docker run --name  ... .... ..."
     ]
 
     connection {
