@@ -55,3 +55,4 @@ override.tf.json
 terraform.rc
 
 aeros-elite.pem
+*.pem
