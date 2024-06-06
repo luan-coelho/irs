@@ -1,3 +1,4 @@
+# Stage 1: Build the application
 FROM node:21-alpine as build
 WORKDIR /app
 
@@ -13,18 +14,24 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve the application using a simple server
-FROM node:21-alpine
+# Stage 2: Serve the application using NGINX
+FROM nginx:alpine
 WORKDIR /app
 
-# Copy build output and dependencies
-COPY --from=build /app/build ./build
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package*.json ./
+# Copy build output to NGINX html directory
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Install serve
-RUN npm install -g serve
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose the port and command to run the app
-EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Copy env script
+COPY env.sh /docker-entrypoint.d/
+
+# Give execute permission to the script
+RUN chmod +x /docker-entrypoint.d/env.sh
+
+# Expose the port
+EXPOSE 80
+
+# Command to run NGINX
+CMD ["sh", "-c", "/docker-entrypoint.d/env.sh && nginx -g 'daemon off;'"]

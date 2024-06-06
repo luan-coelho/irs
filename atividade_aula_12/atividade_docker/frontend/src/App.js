@@ -5,14 +5,34 @@ import "./index.css";
 
 function App() {
   const [messages, setMessages] = useState([]);
+  const [baseUrl, setBaseUrl] = useState('');
+
+  const fetchEnvVariables = async () => {
+    try {
+      const response = await fetch('/config.js');
+      const text = await response.text();
+      const regex = /REACT_APP_API_BASE_URL:\s*"([^"]+)"/;
+      const match = text.match(regex);
+      if (match) {
+        const apiUrl = match[1];
+        console.log(apiUrl);
+        setBaseUrl(apiUrl);
+      }
+    } catch (error) {
+      console.error("Error loading config:", error);
+    }
+  };
 
   useEffect(() => {
-    const baseUrl = process.env.REACT_APP_API_BASE_URL;
-    fetch(`${baseUrl}/api/messages`)
-      .then((response) => response.json())
-      .then((data) => setMessages(data))
-      .catch((error) => console.error("Error fetching messages:", error));
-  }, []);
+    fetchEnvVariables();
+
+    if (baseUrl) {
+      fetch(`${baseUrl}/api/messages`)
+        .then((response) => response.json())
+        .then((data) => setMessages(data))
+        .catch((error) => console.error("Error fetching messages:", error));
+    }
+  }, [baseUrl]);
 
   return (
     <div className="App w-full h-screen bg-gray-100">

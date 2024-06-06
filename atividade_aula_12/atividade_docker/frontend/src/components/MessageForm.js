@@ -1,12 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function MessageForm({ setMessages }) {
   const [content, setContent] = useState("");
+  const [baseUrl, setBaseUrl] = useState('');
+
+  const fetchEnvVariables = async () => {
+    try {
+      const response = await fetch('/config.js');
+      const text = await response.text();
+      const regex = /REACT_APP_API_BASE_URL:\s*"([^"]+)"/;
+      const match = text.match(regex);
+      if (match) {
+        const apiUrl = match[1];
+        console.log(apiUrl);
+        setBaseUrl(apiUrl);
+      }
+    } catch (error) {
+      console.error("Error loading config:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEnvVariables();
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const baseUrl = process.env.REACT_APP_API_BASE_URL;
     fetch(`${baseUrl}/api/messages`, {
       method: "POST",
       headers: {
